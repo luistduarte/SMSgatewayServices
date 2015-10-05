@@ -1,0 +1,5 @@
+Rest/Operations/Send/SendingOperations.class
+Utils/Database.class
+Utils/HttpStatus.class
+Utils/HttpCodes.class
+com/mycompany/smsgwservices/ApplicationConfig.class
