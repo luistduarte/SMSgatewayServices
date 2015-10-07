@@ -64,9 +64,9 @@ public class SendingOperations {
     @GET
     @Produces("application/json")
     public String getJson() {
-        /*
+        
          Gson gson = new Gson();
-         List<receiver> recetores = new ArrayList<receiver>();
+         List<receiver> recetores = new ArrayList<>();
          sender send = new sender(916056618);
          state sta = new state(1, "pending");
          receiver receiver1 = new receiver(123456788);
@@ -76,7 +76,7 @@ public class SendingOperations {
          recetores.add(receiver2);
          request reque = new request(message, send, recetores);
          return gson.toJson(reque);
-         */
+         
 
         /* try {
          String uri = "http://46.101.14.39/localization/Aveiro";
@@ -108,12 +108,14 @@ public class SendingOperations {
          } catch (IOException ex) {
          Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
          }*/
-        return "SMS API RUNNING!!!!";
+        
+         
+         //return "SMS API RUNNING!!!!";
     }
 
     @Path("{senderAddress}/subscriptions")
     @PUT
-    public void notifications(@PathParam("senderAddress") String senderAddress) {
+    public void notifications(@PathParam("senderAddress") int senderAddress) {
 
         Database db = new Database();
         String query = "SELECT * FROM sender WHERE senderAddress='" + senderAddress + "';";
@@ -144,7 +146,7 @@ public class SendingOperations {
     @Path("{senderAddress}/requests/{requestId}/deliveryInfos")
     @GET
     @Produces("application/json")
-    public String getInfo(@PathParam("senderAddress") String senderAddress, @PathParam("requestId") String requestId) {
+    public String getInfo(@PathParam("senderAddress") int senderAddress, @PathParam("requestId") int requestId) {
 
         Gson gson = new Gson();
         HttpStatus status = new HttpStatus();
@@ -165,7 +167,7 @@ public class SendingOperations {
 
         String getstates = "SELECT * FROM receivers INNER JOIN state ON receivers.stateid=state.stateid WHERE requestid='" + requestId + "';";
         ResultSet rs1 = db.executeQuery(getstates);
-        List<receivers> receivers = new ArrayList<receivers>();
+        List<receivers> receivers = new ArrayList<>();
         try {
  
             while(rs1.next())
@@ -181,7 +183,7 @@ public class SendingOperations {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        requestDeliveryInfo infos = new requestDeliveryInfo(receivers);
+        requestDeliveryInfo infos = new requestDeliveryInfo(requestId,receivers);
         return gson.toJson(infos);
     }
 }

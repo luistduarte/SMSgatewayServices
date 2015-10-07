@@ -12,11 +12,21 @@ import java.util.List;
  * @author root
  */
 public class requestDeliveryInfo {
-    
+     private int requestID;
      private List<receivers> receivers;
+    
 
-    public requestDeliveryInfo(List<receivers> receivers) {
+    public requestDeliveryInfo(int requestID,List<receivers> receivers) {
         this.receivers = receivers;
+        this.requestID = requestID;
+    }
+
+    public int getRequestID() {
+        return requestID;
+    }
+
+    public void setRequestID(int requestID) {
+        this.requestID = requestID;
     }
 
     public List<receivers> getReceivers() {
