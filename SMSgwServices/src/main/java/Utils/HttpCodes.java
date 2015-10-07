@@ -14,6 +14,8 @@ public class HttpCodes {
     
     public final String code_406 = "Not Acceptable";
     public final String code_200 = "Ok";
+    public final String code_400 = "Bad Request";
+
 
     public HttpCodes() {
     }

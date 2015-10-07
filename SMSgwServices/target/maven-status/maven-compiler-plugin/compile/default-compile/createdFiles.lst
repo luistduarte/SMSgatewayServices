@@ -1,5 +1,11 @@
-Rest/Operations/Send/SendingOperations.class
 Utils/Database.class
+Models/state.class
+Models/requestDeliveryInfo.class
+Models/request.class
+com/mycompany/smsgwservices/ApplicationConfig.class
+Rest/Operations/Send/SendingOperations.class
+Models/receivers.class
+Models/receiver.class
 Utils/HttpStatus.class
 Utils/HttpCodes.class
-com/mycompany/smsgwservices/ApplicationConfig.class
+Models/sender.class
