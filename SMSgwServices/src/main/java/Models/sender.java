@@ -12,13 +12,17 @@ package Models;
 public class sender {
 
     private int senderAddress;
+    
+    private String username;
     /*
-    private String name;
     private boolean notifications;
     */
-    public sender(int senderAddress) {
+
+    public sender(int senderAddress, String username) {
         this.senderAddress = senderAddress;
+        this.username = username;
     }
+
     /*
     public sender(int senderAddress, String name, boolean notifications) {
         this.senderAddress = senderAddress;
@@ -33,15 +37,10 @@ public class sender {
     public void setSenderAddress(int senderAddress) {
         this.senderAddress = senderAddress;
     }
+    
+    
     /*
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    
     public boolean isNotifications() {
         return notifications;
     }
@@ -50,4 +49,12 @@ public class sender {
         this.notifications = notifications;
     }
     */
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }
