@@ -8,8 +8,12 @@ Rest/Operations/Send/SendingOperations.class
 External/Models/info.class
 Models/receiver.class
 Utils/HttpCodes.class
+Rest/Operations/Services/SubscriveOperations.class
 Rest/Operations/Tests/DefaultMessages.class
 Models/requestDeliveryInfo.class
 Models/receivers.class
+Models/rule.class
+Models/rulestoservice.class
 Utils/HttpStatus.class
+Models/service.class
 Models/sender.class

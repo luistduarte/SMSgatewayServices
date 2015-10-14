@@ -57,7 +57,7 @@ public class SendingOperations {
     public String getJson() {
         //GET#Aveiro
         //PUT:luisduarte#menu#Dish:peixe#Price:10#Doses:20#Dish:carne#Price:10#Doses:20
-        //PUT:luisduarte#reservation#Restaurant:CaisMadeirense#Prato:peixe#Lugares:5#Hora:12
+        //PUT:luisduarte#reservation#Provider:1#Prato:peixe#Lugares:5#Hora:12
         return "SMS API RUNNING!!!!";
     }
 
@@ -87,7 +87,6 @@ public class SendingOperations {
         Gson gson = new Gson();
         Database db = new Database();
         request req = gson.fromJson(content, request.class);
-        
         String message = req.getBody();
         
         

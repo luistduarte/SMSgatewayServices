@@ -42,6 +42,18 @@ public class Database {
         return rs;
     }
     
+    public ResultSet executeQuery(String query, String param1) {
+        ResultSet rs = null;
+        try {
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, param1);
+            rs = stmt.executeQuery();
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }        
+        return rs;
+    }
+    
     public CallableStatement executeCall(String procedure) {
         CallableStatement cs = null;
         try {
@@ -56,6 +68,19 @@ public class Database {
         int rs = 0;
         try {
             PreparedStatement stmt = conn.prepareStatement(query);
+            rs = stmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }        
+        return rs;
+    }
+    
+    public int executeUpdate(String query ,String param1, String param2) {
+        int rs = 0;
+        try {
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, param1);
+            stmt.setString(2, param2);
             rs = stmt.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
