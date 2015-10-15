@@ -2,6 +2,7 @@ Utils/Database.class
 External/Models/updatemenu.class
 Models/state.class
 Models/request.class
+Models/url.class
 com/mycompany/smsgwservices/ApplicationConfig.class
 External/Models/menu.class
 Rest/Operations/Send/SendingOperations.class
