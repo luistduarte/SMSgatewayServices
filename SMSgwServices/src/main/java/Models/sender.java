@@ -14,22 +14,13 @@ public class sender {
     private int senderAddress;
     
     private String username;
-    /*
-    private boolean notifications;
-    */
+
 
     public sender(int senderAddress, String username) {
         this.senderAddress = senderAddress;
         this.username = username;
     }
 
-    /*
-    public sender(int senderAddress, String name, boolean notifications) {
-        this.senderAddress = senderAddress;
-        this.name = name;
-        this.notifications = notifications;
-    }
-    */
     public int getSenderAddress() {
         return senderAddress;
     }
@@ -38,18 +29,6 @@ public class sender {
         this.senderAddress = senderAddress;
     }
     
-    
-    /*
-    
-    public boolean isNotifications() {
-        return notifications;
-    }
-
-    public void setNotifications(boolean notifications) {
-        this.notifications = notifications;
-    }
-    */
-
     public String getUsername() {
         return username;
     }

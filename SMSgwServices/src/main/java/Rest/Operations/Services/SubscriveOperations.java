@@ -60,13 +60,8 @@ public class SubscriveOperations {
     @GET
     @Produces("application/json")
     public String getJson2() {
-        /* Gson gson = new Gson();
-         service serv = new service(1, "http://cenas", "DaveComposer");
-         return gson.toJson(serv);*/
-
         Gson gson = new Gson();
         List<rule> rules = new ArrayList<>();
-
         rule rule1 = new rule("JOGOS");
         rule rule2 = new rule("SSDOP");
         String url = "SUPERURL";
@@ -89,6 +84,7 @@ public class SubscriveOperations {
         try {
             if (rs.next()) {
                 Response.ResponseBuilder builder = Response.status(Response.Status.CONFLICT);
+                builder.header("Access-Control-Allow-Origin", "*");
                 Response response = builder.build();
                 throw new WebApplicationException(response);
             } else {
@@ -97,10 +93,12 @@ public class SubscriveOperations {
                 insert = db.executeUpdate(putService, serv.getName(), serv.getServiceurl());
                 if (insert == 0) {
                     Response.ResponseBuilder builder = Response.status(Response.Status.NOT_ACCEPTABLE);
+                    builder.header("Access-Control-Allow-Origin", "*");
                     Response response = builder.build();
                     throw new WebApplicationException(response);
                 } else {
                     Response.ResponseBuilder builder = Response.status(Response.Status.OK);
+                    builder.header("Access-Control-Allow-Origin", "*");
                     Response response = builder.build();
                     throw new WebApplicationException(response);
                 }
@@ -110,6 +108,7 @@ public class SubscriveOperations {
             Logger.getLogger(SubscriveOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
 
     @Path("/service/rule")
     @PUT
@@ -135,11 +134,13 @@ public class SubscriveOperations {
                     }
                 }
                 Response.ResponseBuilder builder = Response.status(Response.Status.OK);
+                builder.header("Access-Control-Allow-Origin", "*");
                 Response response = builder.build();
                 throw new WebApplicationException(response);
 
             } else {
                 Response.ResponseBuilder builder = Response.status(Response.Status.NOT_ACCEPTABLE);
+                builder.header("Access-Control-Allow-Origin", "*");
                 Response response = builder.build();
                 throw new WebApplicationException(response);
             }
@@ -171,6 +172,7 @@ public class SubscriveOperations {
             }
             if (i == 0) {
                 Response.ResponseBuilder builder = Response.status(Response.Status.NO_CONTENT);
+                builder.header("Access-Control-Allow-Origin", "*");
                 Response response = builder.build();
                 throw new WebApplicationException(response);
             } else {
@@ -181,6 +183,7 @@ public class SubscriveOperations {
             Logger.getLogger(SubscriveOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
         Response.ResponseBuilder builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
+        builder.header("Access-Control-Allow-Origin", "*");
         Response response = builder.build();
         throw new WebApplicationException(response);
     }

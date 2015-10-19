@@ -5,7 +5,6 @@
  */
 package Rest.Operations.Send;
 
-
 import Models.*;
 import Utils.Database;
 import Utils.HttpCodes;
@@ -29,7 +28,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.MediaType;
 
-
 /**
  * REST Web Service
  *
@@ -49,8 +47,6 @@ public class SendingOperations {
      */
     public SendingOperations() {
     }
-
-
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -87,46 +83,70 @@ public class SendingOperations {
         Gson gson = new Gson();
         Database db = new Database();
         request req = gson.fromJson(content, request.class);
-        String message = req.getBody();
-        
-        
+
+        String regex = null;
+        boolean flag = true;
+
+        try {
+
+            String getRules = "SELECT * FROM rule;";
+            ResultSet rs1 = db.executeQuery(getRules);
+
+            while (rs1.next() || flag) {
+                if (req.getBody().matches(rs1.getString("regex"))) {
+                    flag = false;
+                    regex = rs1.getString("regex");
+                }
+            }
+            String getURL = "SELECT * FROM rule INNER JOIN service service.serviceid=rule.serviceid WHERE regex = ? ;";
+            ResultSet rs2 = db.executeQuery(getURL, regex);
+            rs2.next();
+            String URL = rs2.getString("serviceurl");
+
+            /*chamar serviço e mandar body do request*/
+            
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
         return gson.toJson(req);
     }
 
-    @Path("{senderAddress}/requests/{requestId}/deliveryInfos")
-    @GET
-    @Produces("application/json")
-    public String getInfo(@PathParam("senderAddress") int senderAddress, @PathParam("requestId") int requestId) {
-        Gson gson = new Gson();
-        HttpStatus status = new HttpStatus();
-        HttpCodes codes = new HttpCodes();
-        Database db = new Database();
-        String checkRequest = "SELECT * FROM request WHERE senderAddress='" + senderAddress + "' AND requestid='" + requestId + "';";
-        ResultSet rs = db.executeQuery(checkRequest);
-        try {
-            if (!rs.next()) {
-                status.setCode(400);
-                status.setDescription(codes.code_400);
-                return gson.toJson(status);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        String getstates = "SELECT * FROM receivers INNER JOIN state ON receivers.stateid=state.stateid WHERE requestid='" + requestId + "';";
-        ResultSet rs1 = db.executeQuery(getstates);
-        List<receivers> receivers = new ArrayList<>();
-        try {
-            while (rs1.next()) {
-                state stat = new state(rs1.getInt("stateid"), rs1.getString("description"));
-                receiver rec = new receiver(rs1.getInt("receiverAddress"));
-                receivers receiver = new receivers(rec, stat);
-                receivers.add(receiver);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        requestDeliveryInfo infos = new requestDeliveryInfo(requestId, receivers);
-        return gson.toJson(infos);
-    }
+    /*
+     @Path("{senderAddress}/requests/{requestId}/deliveryInfos")
+     @GET
+     @Produces("application/json")
+     public String getInfo(@PathParam("senderAddress") int senderAddress, @PathParam("requestId") int requestId) {
+     Gson gson = new Gson();
+     HttpStatus status = new HttpStatus();
+     HttpCodes codes = new HttpCodes();
+     Database db = new Database();
+     String checkRequest = "SELECT * FROM request WHERE senderAddress='" + senderAddress + "' AND requestid='" + requestId + "';";
+     ResultSet rs = db.executeQuery(checkRequest);
+     try {
+     if (!rs.next()) {
+     status.setCode(400);
+     status.setDescription(codes.code_400);
+     return gson.toJson(status);
+     }
+     } catch (SQLException ex) {
+     Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     String getstates = "SELECT * FROM receivers INNER JOIN state ON receivers.stateid=state.stateid WHERE requestid='" + requestId + "';";
+     ResultSet rs1 = db.executeQuery(getstates);
+     List<receivers> receivers = new ArrayList<>();
+     try {
+     while (rs1.next()) {
+     state stat = new state(rs1.getInt("stateid"), rs1.getString("description"));
+     receiver rec = new receiver(rs1.getInt("receiverAddress"));
+     receivers receiver = new receivers(rec, stat);
+     receivers.add(receiver);
+     }
+     } catch (SQLException ex) {
+     Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     requestDeliveryInfo infos = new requestDeliveryInfo(requestId, receivers);
+     return gson.toJson(infos);
+     }*/
 }

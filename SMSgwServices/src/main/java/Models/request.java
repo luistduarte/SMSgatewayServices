@@ -16,32 +16,13 @@ public class request {
     //private int requestid;
     
     private String body;
-    private sender senderAddress;
-    private List<receiver> receiver;
+    private int senderAddress;
+ 
 
-   /* public request(int requestid, String body, sender senderAddress, List<receiver> receiver) {
-        this.requestid = requestid;
+    public request(String body, int senderAddress) {
         this.body = body;
         this.senderAddress = senderAddress;
-        this.receiver = receiver;
     }
-    */
-    public request(String body, sender senderAddress, List<receiver> receiver) {
-        this.body = body;
-        this.senderAddress = senderAddress;
-        this.receiver = receiver;
-    }
-    
-    
-    /*
-    public int getRequestid() {
-        return requestid;
-    }
-
-    public void setRequestid(int requestid) {
-        this.requestid = requestid;
-    }
-    */
 
     public String getBody() {
         return body;
@@ -51,24 +32,11 @@ public class request {
         this.body = body;
     }
 
-    public sender getSenderAddress() {
+    public int getSenderAddress() {
         return senderAddress;
     }
 
-    public void setSenderAddress(sender senderAddress) {
+    public void setSenderAddress(int senderAddress) {
         this.senderAddress = senderAddress;
     }
-
-    public List<receiver> getReceivers() {
-        return receiver;
-    }
-
-    public void setReceivers(List<receiver> receiver) {
-        this.receiver = receiver;
-    }
-    
-    
-    
-    
-    
 }
