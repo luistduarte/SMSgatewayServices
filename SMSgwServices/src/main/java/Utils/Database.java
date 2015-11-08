@@ -86,7 +86,17 @@ public class Database {
         }        
         return rs;
     }
-    
+    public int executeUpdate(String query ,String param1) {
+        int rs = 0;
+        try {
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, param1);
+            rs = stmt.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
+        }        
+        return rs;
+    }
     public int executeUpdate(String query ,String param1, String param2) {
         int rs = 0;
         try {

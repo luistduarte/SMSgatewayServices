@@ -2,16 +2,12 @@
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Rest/Operations/Send/SendingOperations.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Models/request.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Rest/Operations/Services/SubscriveOperations.java
-/home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Models/requestDeliveryInfo.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/External/Models/info.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Models/service.java
+/home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Models/requestStatus.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Utils/HttpStatus.java
-/home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/External/Models/menu.java
-/home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Models/receiver.java
-/home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/External/Models/updatemenu.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Utils/Database.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Models/rulestoservice.java
-/home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Models/receivers.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/com/mycompany/smsgwservices/ApplicationConfig.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Utils/HttpCodes.java
 /home/luis/Documents/es/es-smsgw/SMSgwServices/src/main/java/Models/sender.java
