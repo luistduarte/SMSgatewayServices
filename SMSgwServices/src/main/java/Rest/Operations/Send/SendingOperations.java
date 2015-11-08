@@ -10,9 +10,7 @@ import Utils.Database;
 import Utils.HttpCodes;
 import Utils.HttpStatus;
 import com.google.gson.Gson;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -20,8 +18,6 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
@@ -97,7 +93,7 @@ public class SendingOperations {
 
         String regex = null;
         boolean flag = true;
-        String last=null;
+        String last = null;
         try {
             // inserir request na bd
             String putRequest = "INSERT INTO request (senderAddress, body, stateid) VALUES (" + senderAddress + ",?,1);";
@@ -147,15 +143,14 @@ public class SendingOperations {
             os.flush();
 
             /*
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    (conn.getInputStream())));
+             BufferedReader br = new BufferedReader(new InputStreamReader(
+             (conn.getInputStream())));
 
-            String output;
-            System.out.println("Output from Server .... \n");
-            while ((output = br.readLine()) != null) {
-                fromserver.append(output);
-            }*/
-            
+             String output;
+             System.out.println("Output from Server .... \n");
+             while ((output = br.readLine()) != null) {
+             fromserver.append(output);
+             }*/
             conn.disconnect();
 
         } catch (SQLException ex) {
@@ -172,41 +167,77 @@ public class SendingOperations {
 
     }
 
-    /*@Path("{senderAddress}/requests/{requestId}/status")
-    @GET
+    @Path("{requestid}/response")
+    @POST
+    @Consumes("application/json")
     @Produces("application/json")
-    public String getInfo(@PathParam("senderAddress") int senderAddress, @PathParam("requestId") int requestId) {
+    public String sendResponse(@PathParam("requestid") int requestid, String content) {
         Gson gson = new Gson();
-        HttpStatus status = new HttpStatus();
-        HttpCodes codes = new HttpCodes();
         Database db = new Database();
-        String checkRequest = "SELECT * FROM request WHERE senderAddress='" + senderAddress + "' AND requestid='" + requestId + "';";
-        ResultSet rs = db.executeQuery(checkRequest);
+        response resp = gson.fromJson(content, response.class); 
+        String query = "SELECT * FROM request WHERE requestid='" + requestid + "';";
+        ResultSet rs = db.executeQuery(query);
         try {
-            if (!rs.next()) {
-                status.setCode(400);
-                status.setDescription(codes.code_400);
-                return gson.toJson(status);
+            if (rs.next()) {
+                
+                int number = rs.getInt("senderAddress");      
+                //TODO: envia SMS PARA USER
+                
+                
+                //update status da sms
+                String updateQuery = "UPDATE request SET stateid = 3 WHERE requestid='" + requestid + "';";
+                db.executeUpdate(updateQuery);
+                
+                Response.ResponseBuilder builder = Response.status(Response.Status.OK);
+                builder.header("Access-Control-Allow-Origin", "*");
+                Response response = builder.build();
+                throw new WebApplicationException(response);
             }
         } catch (SQLException ex) {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
-        String getstates = "SELECT * FROM receivers INNER JOIN state ON receivers.stateid=state.stateid WHERE requestid='" + requestId + "';";
-        ResultSet rs1 = db.executeQuery(getstates);
-        List<receivers> receivers = new ArrayList<>();
-        try {
-            while (rs1.next()) {
-                state stat = new state(rs1.getInt("stateid"), rs1.getString("description"));
-                receiver rec = new receiver(rs1.getInt("receiverAddress"));
-                receivers receiver = new receivers(rec, stat);
-                receivers.add(receiver);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        requestDeliveryInfo infos = new requestDeliveryInfo(requestId, receivers);
-        return gson.toJson(infos);
-    }*/
+
+        Response.ResponseBuilder builder = Response.status(Response.Status.NOT_ACCEPTABLE);
+        builder.header("Access-Control-Allow-Origin", "*");
+        Response response = builder.build();
+        throw new WebApplicationException(response);
+    }
+
+    /*@Path("{senderAddress}/requests/{requestId}/status")
+     @GET
+     @Produces("application/json")
+     public String getInfo(@PathParam("senderAddress") int senderAddress, @PathParam("requestId") int requestId) {
+     Gson gson = new Gson();
+     HttpStatus status = new HttpStatus();
+     HttpCodes codes = new HttpCodes();
+     Database db = new Database();
+     String checkRequest = "SELECT * FROM request WHERE senderAddress='" + senderAddress + "' AND requestid='" + requestId + "';";
+     ResultSet rs = db.executeQuery(checkRequest);
+     try {
+     if (!rs.next()) {
+     status.setCode(400);
+     status.setDescription(codes.code_400);
+     return gson.toJson(status);
+     }
+     } catch (SQLException ex) {
+     Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     String getstates = "SELECT * FROM receivers INNER JOIN state ON receivers.stateid=state.stateid WHERE requestid='" + requestId + "';";
+     ResultSet rs1 = db.executeQuery(getstates);
+     List<receivers> receivers = new ArrayList<>();
+     try {
+     while (rs1.next()) {
+     state stat = new state(rs1.getInt("stateid"), rs1.getString("description"));
+     receiver rec = new receiver(rs1.getInt("receiverAddress"));
+     receivers receiver = new receivers(rec, stat);
+     receivers.add(receiver);
+     }
+     } catch (SQLException ex) {
+     Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     requestDeliveryInfo infos = new requestDeliveryInfo(requestId, receivers);
+     return gson.toJson(infos);
+     }*/
     @Path("{senderAddress}/requests/{requestId}/status")
     @GET
     @Produces("application/json")
@@ -227,14 +258,14 @@ public class SendingOperations {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
         int state = rs.getInt("stateid");
-        String getDescription = "SELECT * FROM state WHERE stateid = "+state+";";
-        
+        String getDescription = "SELECT * FROM state WHERE stateid = " + state + ";";
+
         ResultSet rs1 = db.executeQuery(getDescription);
-        String description=null;
+        String description = null;
         try {
             if (rs1.next()) {
-               description = rs1.getString("description");
-                
+                description = rs1.getString("description");
+
             }
         } catch (SQLException ex) {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);

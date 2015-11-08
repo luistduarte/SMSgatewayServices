@@ -1,5 +1,6 @@
 Utils/Database.class
 Models/state.class
+Models/response.class
 Models/requestStatus.class
 Models/request.class
 Models/url.class
