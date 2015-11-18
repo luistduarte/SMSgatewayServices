@@ -4,9 +4,6 @@
  * and open the template in the editor.
  */
 package Models;
-
-import java.util.List;
-
 /**
  *
  * @author root
@@ -16,11 +13,11 @@ public class request {
     //private int requestid;
     
     private String body;
-    private int senderAddress;
+    private String senderAddress;
     private int requestid;
     private int stateid;
 
-    public request(String body, int senderAddress, int requestid, int stateid) {
+    public request(String body, String senderAddress, int requestid, int stateid) {
         this.body = body;
         this.senderAddress = senderAddress;
         this.requestid = requestid;
@@ -34,8 +31,6 @@ public class request {
     public void setStateid(int stateid) {
         this.stateid = stateid;
     }
-
-    
 
     public int getRequestid() {
         return requestid;
@@ -53,11 +48,11 @@ public class request {
         this.body = body;
     }
 
-    public int getSenderAddress() {
+    public String getSenderAddress() {
         return senderAddress;
     }
 
-    public void setSenderAddress(int senderAddress) {
+    public void setSenderAddress(String senderAddress) {
         this.senderAddress = senderAddress;
     }
 }

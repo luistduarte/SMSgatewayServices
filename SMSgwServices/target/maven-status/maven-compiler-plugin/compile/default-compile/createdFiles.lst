@@ -9,7 +9,6 @@ Rest/Operations/Send/SendingOperations.class
 External/Models/info.class
 Utils/HttpCodes.class
 Rest/Operations/Services/SubscriveOperations.class
-Rest/Operations/Tests/DefaultMessages.class
 Models/rule.class
 Models/rulestoservice.class
 Utils/HttpStatus.class

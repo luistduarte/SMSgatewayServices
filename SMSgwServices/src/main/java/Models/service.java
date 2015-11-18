@@ -14,7 +14,6 @@ public class service {
     private String serviceurl;
     private String name;
 
-
     public service(int serviceid, String serviceurl, String name) {
         this.serviceid = serviceid;
         this.serviceurl = serviceurl;

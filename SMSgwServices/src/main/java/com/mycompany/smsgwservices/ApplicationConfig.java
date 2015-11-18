@@ -31,7 +31,6 @@ public class ApplicationConfig extends Application {
     private void addRestResourceClasses(Set<Class<?>> resources) {
         resources.add(Rest.Operations.Send.SendingOperations.class);
         resources.add(Rest.Operations.Services.SubscriveOperations.class);
-        resources.add(Rest.Operations.Tests.DefaultMessages.class);
     }
     
 }

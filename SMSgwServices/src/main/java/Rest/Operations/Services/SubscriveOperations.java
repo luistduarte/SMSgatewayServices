@@ -42,17 +42,12 @@ public class SubscriveOperations {
     public SubscriveOperations() {
     }
 
-    /**
-     * Retrieves representation of an instance of
-     * Rest.Operations.Services.SubscriveOperations
-     *
-     * @return an instance of java.lang.String
-     */
+    
     @GET
     @Produces("application/json")
     public String getJson() {
         Gson gson = new Gson();
-        service serv = new service(1, "http://cenas", "DaveComposer");
+        service serv = new service(1, "http://url", "Composer");
         return gson.toJson(serv);
     }
 
@@ -62,9 +57,9 @@ public class SubscriveOperations {
     public String getJson2() {
         Gson gson = new Gson();
         List<rule> rules = new ArrayList<>();
-        rule rule1 = new rule("JOGOS");
-        rule rule2 = new rule("SSDOP");
-        String url = "SUPERURL";
+        rule rule1 = new rule("rule1");
+        rule rule2 = new rule("rule2");
+        String url = "http://url";
         rules.add(rule1);
         rules.add(rule2);
         rulestoservice rul = new rulestoservice(url, rules);

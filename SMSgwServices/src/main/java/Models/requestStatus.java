@@ -11,10 +11,10 @@ package Models;
  */
 public class requestStatus {
     private int requestid;
-    private int senderAddress;
+    private String senderAddress;
     private String status;
 
-    public requestStatus(int requestid, int senderAddress, String status) {
+    public requestStatus(int requestid, String senderAddress, String status) {
         this.requestid = requestid;
         this.senderAddress = senderAddress;
         this.status = status;
@@ -28,11 +28,11 @@ public class requestStatus {
         this.requestid = requestid;
     }
 
-    public int getSenderAddress() {
+    public String getSenderAddress() {
         return senderAddress;
     }
 
-    public void setSenderAddress(int senderAddress) {
+    public void setSenderAddress(String senderAddress) {
         this.senderAddress = senderAddress;
     }
 

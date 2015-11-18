@@ -11,21 +11,20 @@ package Models;
  */
 public class sender {
 
-    private int senderAddress;
+    private String senderAddress;
     
     private String username;
 
-
-    public sender(int senderAddress, String username) {
+    public sender(String senderAddress, String username) {
         this.senderAddress = senderAddress;
         this.username = username;
     }
 
-    public int getSenderAddress() {
+    public String getSenderAddress() {
         return senderAddress;
     }
 
-    public void setSenderAddress(int senderAddress) {
+    public void setSenderAddress(String senderAddress) {
         this.senderAddress = senderAddress;
     }
     
