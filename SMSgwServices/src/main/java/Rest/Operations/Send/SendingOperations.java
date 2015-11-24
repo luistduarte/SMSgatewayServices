@@ -79,6 +79,8 @@ public class SendingOperations {
                 notifications = rs.getBoolean("notifications");
                 String updateQuery = "UPDATE sender SET notifications = " + !notifications + " WHERE senderAddress=?;";
                 db.executeUpdate(updateQuery, senderAddress);
+            } else {
+                return "Number Never Used";
             }
         } catch (SQLException ex) {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
@@ -117,8 +119,8 @@ public class SendingOperations {
                 db.executeUpdate(putUser, senderAddress, "unknown", "0");
             }
             // inserir request na bd
-            String putRequest = "INSERT INTO request (senderAddress, body, stateid) VALUES (" + senderAddress + ",?,1);";
-            int insert = db.executeUpdate(putRequest, text);
+            String putRequest = "INSERT INTO request (senderAddress, body, stateid) VALUES (?,?,1);";
+            int insert = db.executeUpdate(putRequest, senderAddress, text);
             if (insert == 0) {
                 Response.ResponseBuilder builder = Response.status(Response.Status.NOT_ACCEPTABLE);
                 builder.header("Access-Control-Allow-Origin", "*");
@@ -184,7 +186,7 @@ public class SendingOperations {
         }
         requestStatus reqStatus = new requestStatus(Integer.parseInt(last), senderAddress, "MessageWaiting");
 
-        return gson.toJson(reqStatus);
+        return "RequestID:" + last + "->Status:MessageWaiting";
 
     }
 
@@ -192,18 +194,83 @@ public class SendingOperations {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public String sendResponse(@PathParam("requestid") int requestid, String content) {
+    public String sendResponse(@PathParam("requestid") int requestid, String content) throws MalformedURLException {
         Gson gson = new Gson();
         Database db = new Database();
         response resp = gson.fromJson(content, response.class);
+
         String query = "SELECT * FROM request WHERE requestid='" + requestid + "';";
         ResultSet rs = db.executeQuery(query);
         try {
             if (rs.next()) {
 
-                int number = rs.getInt("senderAddress");
-                //TODO: envia SMS PARA USER
+                String number = rs.getString("senderAddress");
+                String toSendSMS = null;
 
+                String getNotif = "SELECT * FROM sender WHERE senderAddress=?;";
+                ResultSet rsNotif = db.executeQuery(getNotif, number);
+                boolean notifications = false;
+
+                if (rsNotif.next()) {
+                    notifications = rsNotif.getBoolean("notifications");
+                }
+
+                if (notifications) {
+                    if (resp.getStatus() == 200) {
+
+                        toSendSMS = "http://localhost:15013/cgi-bin/sendsms?username=kannel&password=kannel&to="
+                                + number.substring(4) + "&text=Message%20Accepted";
+                    } else {
+                        toSendSMS = "http://localhost:15013/cgi-bin/sendsms?username=kannel&password=kannel&to="
+                                + number.substring(4) + "&text=Message%20Not%20Accepted";
+                    }
+
+                    URL url = new URL(toSendSMS);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Accept", "application/json");
+
+                    if (conn.getResponseCode() != 202) {
+                        throw new RuntimeException("Failed : HTTP error code : "
+                                + conn.getResponseCode());
+                    }
+
+                    BufferedReader br = new BufferedReader(new InputStreamReader(
+                            (conn.getInputStream())));
+
+                    String output;
+                    System.out.println("Output from Server .... \n");
+                    while ((output = br.readLine()) != null) {
+                        System.out.println(output);
+                    }
+
+                    conn.disconnect();
+                }
+
+                // "http://localhost:15013/cgi-bin/sendsms?username=kannel&password=kannel&to=914476957&text=dave%20bot"
+                toSendSMS = "http://localhost:15013/cgi-bin/sendsms?username=kannel&password=kannel&to="
+                        + number.substring(4) + "&text=" + content;
+                String x = toSendSMS.replaceAll("\\s+", "%20");
+                URL url = new URL(x);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Accept", "application/json");
+
+                if (conn.getResponseCode() != 202) {
+                    throw new RuntimeException("Failed : HTTP error code : "
+                            + conn.getResponseCode());
+                }
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(
+                        (conn.getInputStream())));
+
+                String output;
+                System.out.println("Output from Server .... \n");
+                while ((output = br.readLine()) != null) {
+                    System.out.println(output);
+                }
+
+                conn.disconnect();
                 //update status da sms
                 String updateQuery = "UPDATE request SET stateid = 3 WHERE requestid='" + requestid + "';";
                 db.executeUpdate(updateQuery);
@@ -214,6 +281,8 @@ public class SendingOperations {
                 throw new WebApplicationException(response);
             }
         } catch (SQLException ex) {
+            Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -226,36 +295,120 @@ public class SendingOperations {
     @Path("{senderAddress}/requests/{requestId}/status")
     @GET
     @Produces("application/json")
-    public String getInfo(@PathParam("senderAddress") String senderAddress, @PathParam("requestId") int requestId) throws SQLException {
-        Gson gson = new Gson();
-        HttpStatus status = new HttpStatus();
-        HttpCodes codes = new HttpCodes();
-        Database db = new Database();
-        String checkRequest = "SELECT * FROM request WHERE senderAddress=? AND requestid='" + requestId + "';";
-        ResultSet rs = db.executeQuery(checkRequest, senderAddress);
+    public String getInfo(@PathParam("senderAddress") String senderAddress, @PathParam("requestId") String requestId) throws SQLException {
         try {
-            if (!(rs.next())) {
-                status.setCode(400);
-                status.setDescription(codes.code_400);
-                return gson.toJson(status);
+            Gson gson = new Gson();
+            HttpStatus status = new HttpStatus();
+            HttpCodes codes = new HttpCodes();
+            Database db = new Database();
+            int intReqID;
+            if (requestId.equals("last")) {
+                String getRequestID = "SELECT * FROM request WHERE senderAddress=? ORDER BY requestid DESC";
+                ResultSet rsReq = db.executeQuery(getRequestID, senderAddress);
+                rsReq.next();
+                intReqID = Integer.parseInt(rsReq.getString("requestid"));
+            } else {
+                intReqID = Integer.parseInt(requestId);
             }
-        } catch (SQLException ex) {
+            
+            String checkRequest = "SELECT * FROM request WHERE senderAddress=? AND requestid='" + intReqID + "';";
+            ResultSet rs = db.executeQuery(checkRequest, senderAddress);
+            try {
+                if (!(rs.next())) {
+                    Response.ResponseBuilder builder = Response.status(Response.Status.NOT_ACCEPTABLE);
+                    builder.header("Access-Control-Allow-Origin", "*");
+                    Response response = builder.build();
+                    throw new WebApplicationException(response);
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            int state = rs.getInt("stateid");
+            String getDescription = "SELECT * FROM state WHERE stateid = " + state + ";";
+            
+            ResultSet rs1 = db.executeQuery(getDescription);
+            String description = null;
+            try {
+                if (rs1.next()) {
+                    description = rs1.getString("description");
+                    
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            requestStatus reqStatus = new requestStatus(intReqID, senderAddress, description);
+            
+            String toSendSMS = "http://localhost:15013/cgi-bin/sendsms?username=kannel&password=kannel&to="
+                    + senderAddress.substring(4) + "&text=Status:"+description  ;
+            String x = toSendSMS.replaceAll("\\s+", "%20");
+            URL url = new URL(x);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+            
+            if (conn.getResponseCode() != 202) {
+                throw new RuntimeException("Failed : HTTP error code : "
+                        + conn.getResponseCode());
+            }
+            
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    (conn.getInputStream())));
+            
+            String output;
+            System.out.println("Output from Server .... \n");
+            while ((output = br.readLine()) != null) {
+                System.out.println(output);
+            }
+            
+            conn.disconnect();
+            
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
-        int state = rs.getInt("stateid");
-        String getDescription = "SELECT * FROM state WHERE stateid = " + state + ";";
-
-        ResultSet rs1 = db.executeQuery(getDescription);
-        String description = null;
-        try {
-            if (rs1.next()) {
-                description = rs1.getString("description");
-
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        requestStatus reqStatus = new requestStatus(requestId, senderAddress, description);
-        return gson.toJson(reqStatus);
+        return "asd";
     }
+    /*
+     @Path("{senderAddress}/requests/{requestId}/status")
+     @GET
+     @Produces("application/json")
+     public String getInfo(@PathParam("senderAddress") String senderAddress, @PathParam("requestId") int requestId) throws SQLException {
+     Gson gson = new Gson();
+     HttpStatus status = new HttpStatus();
+     HttpCodes codes = new HttpCodes();
+     Database db = new Database();
+     String checkRequest = "SELECT * FROM request WHERE senderAddress=? AND requestid='" + requestId + "';";
+     ResultSet rs = db.executeQuery(checkRequest, senderAddress);
+     try {
+     if (!(rs.next())) {
+     status.setCode(400);
+     status.setDescription(codes.code_400);
+     return gson.toJson(status);
+     }
+     } catch (SQLException ex) {
+     Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     int state = rs.getInt("stateid");
+     String getDescription = "SELECT * FROM state WHERE stateid = " + state + ";";
+
+     ResultSet rs1 = db.executeQuery(getDescription);
+     String description = null;
+     try {
+     if (rs1.next()) {
+     description = rs1.getString("description");
+
+     }
+     } catch (SQLException ex) {
+     Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
+     }
+     requestStatus reqStatus = new requestStatus(requestId, senderAddress, description);
+     return gson.toJson(reqStatus);
+     }
+    
+    
+    
+    
+    
+     */
 }
