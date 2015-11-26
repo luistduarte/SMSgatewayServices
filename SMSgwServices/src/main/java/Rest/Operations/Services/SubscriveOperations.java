@@ -104,7 +104,6 @@ public class SubscriveOperations {
         }
     }
     
-
     @Path("/service/rule")
     @PUT
     @Consumes("application/json")
