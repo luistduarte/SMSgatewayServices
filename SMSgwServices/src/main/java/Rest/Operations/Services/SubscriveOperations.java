@@ -1,11 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Rest.Operations.Services;
 
-import Models.*;
+import Models.rule;
+import Models.rulestoservice;
+import Models.service;
+import Models.url;
 import Utils.Database;
 import com.google.gson.Gson;
 import java.sql.ResultSet;
@@ -17,8 +15,7 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
+import javax.ws.rs.Consumes;    
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
@@ -26,9 +23,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 /**
- * REST Web Service
+ * REST SMS API WebServices
  *
- * @author root
+ * @author Luis Duarte
  */
 @Path("subscrive")
 public class SubscriveOperations {
@@ -42,30 +39,11 @@ public class SubscriveOperations {
     public SubscriveOperations() {
     }
 
-    
-    @GET
-    @Produces("application/json")
-    public String getJson() {
-        Gson gson = new Gson();
-        service serv = new service(1, "http://url", "Composer");
-        return gson.toJson(serv);
-    }
-
-    @Path("rules")
-    @GET
-    @Produces("application/json")
-    public String getJson2() {
-        Gson gson = new Gson();
-        List<rule> rules = new ArrayList<>();
-        rule rule1 = new rule("rule1");
-        rule rule2 = new rule("rule2");
-        String url = "http://url";
-        rules.add(rule1);
-        rules.add(rule2);
-        rulestoservice rul = new rulestoservice(url, rules);
-        return gson.toJson(rul);
-    }
-
+    /**
+     * One Composer can register their service, for that need to give their service Url, and their name
+     * 
+     * @param content json composed by serviceurl and name
+     */
     @Path("/service")
     @PUT
     @Consumes("application/json")
@@ -98,12 +76,16 @@ public class SubscriveOperations {
                     throw new WebApplicationException(response);
                 }
             }
-
         } catch (SQLException ex) {
             Logger.getLogger(SubscriveOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    /**
+     * One Composer can add regex rules for our service forward messages for their service, for that need to give url of their service and list of rules
+     * 
+     * @param content json composed by url and list of rules
+     */
     @Path("/service/rule")
     @PUT
     @Consumes("application/json")
@@ -144,6 +126,12 @@ public class SubscriveOperations {
 
     }
 
+    /**
+     * Service just for check rules for one composer url
+     * 
+     * @param content json with just one field (url)
+     * @return List of rules for selected service
+     */
     @Path("/service/check")
     @POST
     @Consumes("application/json")
@@ -181,5 +169,4 @@ public class SubscriveOperations {
         Response response = builder.build();
         throw new WebApplicationException(response);
     }
-
 }

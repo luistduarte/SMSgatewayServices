@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Utils;
 
 import java.sql.CallableStatement;
@@ -16,7 +11,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author root
+ * @author Luis Duarte
  */
 public class Database {
      private Connection conn;

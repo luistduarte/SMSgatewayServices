@@ -33,7 +33,7 @@
             <version>7.0</version>
             <type>jar</type>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.6</version>
@@ -87,7 +87,36 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+            <groupId>com.qmino</groupId>
+            <artifactId>miredot-plugin</artifactId>
+            <version>1.6.2</version>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>restdoc</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <license>UHJvamVjdHxjb20ubXljb21wYW55LlNNU2d3U2VydmljZXN8MjAxNi0xMS0yNnx0cnVlI01Dd0NGRHZTR0xhcjdXdjVtSHM1RjlnNEg0a2JwNC9OQWhRRkNuQ3Z5MmJ3cUdpVFYyNmZmWUFzZkswV1B3PT0=</license>
+               <!-- apply for spring mvc support
+               <restModel>
+                  <restFramework>
+                     <name>spring-mvc</name>
+                  </restFramework>
+               </restModel>
+               -->
+               <!-- insert other configuration here (optional) -->
+            </configuration>
+         </plugin>            
         </plugins>
     </build>
-
+    <pluginRepositories>
+        <pluginRepository>
+            <id>miredot</id>
+            <name>MireDot Releases</name>
+            <url>http://nexus.qmino.com/content/repositories/miredot</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

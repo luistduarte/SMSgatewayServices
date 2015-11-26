@@ -1,14 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Rest.Operations.Send;
 
-import Models.*;
+import Models.request;
+import Models.response;
 import Utils.Database;
-import Utils.HttpCodes;
-import Utils.HttpStatus;
 import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,16 +25,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PUT;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 /**
- * REST Web Service
+ * REST SMS API WebServices
  *
- * @author root
+ * @author Luis Duarte
  */
 @Path("outbound")
 public class SendingOperations {
@@ -57,27 +50,45 @@ public class SendingOperations {
     public SendingOperations() {
     }
 
+    /**
+     * Just one get For Test API
+     * 
+     * @return String SMS API RUNNING!!!!
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public String getJson() {
         return "SMS API RUNNING!!!!";
     }
 
+    /**
+     * Service for enable or disable notifications
+     *
+     * @param senderAddress request sent from..
+     * @return String with status of request, or Notifications Enabled,
+     * Notifications Disabled or Number Never Used
+     */
     @Path("{senderAddress}/subscriptions")
     @GET
-    public void notifications(@PathParam("senderAddress") String senderAddress) {
+    public String notifications(@PathParam("senderAddress") String senderAddress) {
+        String result = null;
         try {
             //check if senderAddress exist, if not return number never used, if exist enable or disable notifications
             Database db = new Database();
             String query = "SELECT * FROM sender WHERE senderAddress=?;";
             ResultSet rs = db.executeQuery(query, senderAddress);
             boolean notifications = false;
-            String result = null;
+
             try {
                 if (rs.next()) {
                     notifications = rs.getBoolean("notifications");
                     String updateQuery = "UPDATE sender SET notifications = " + !notifications + " WHERE senderAddress=?;";
                     db.executeUpdate(updateQuery, senderAddress);
+                    if (notifications) {
+                        result = "Notifications disabled";
+                    } else {
+                        result = "Notifications enabled";
+                    }
                 } else {
                     result = "Number Never Used";
                 }
@@ -85,16 +96,11 @@ public class SendingOperations {
                 Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
             }
             db.close();
-            if (notifications) {
-                result = "Notifications disabled";
-            } else {
-                result = "Notifications enabled";
-            }
 
             //send sms with result of request for enable or disable notifications
             String toSendSMS = "http://localhost:15013/cgi-bin/sendsms?username=kannel&password=kannel&to="
                     + senderAddress.substring(4) + "&text=" + result;
-            
+
             URL url = new URL(toSendSMS.replaceAll("\\s+", "%20"));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -111,23 +117,30 @@ public class SendingOperations {
                 System.out.println(output);
             }
             conn.disconnect();
-            
+
         } catch (MalformedURLException ex) {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        return result;
     }
 
+    /**
+     * Service for receive message from Kannel, receive senderAddress and also text Message as parameter name text 
+     * 
+     * @param senderAddress request set from
+     * @return String MessageDelivered for senderAddress
+     */
     @Path("{senderAddress}/requests")
     @GET
-    public String sendSMS(@PathParam("senderAddress") String senderAddress) throws MalformedURLException, IOException {
+    public String sendSMS(@PathParam("senderAddress") String senderAddress)  {
         MultivaluedMap<String, String> m = context.getQueryParameters();
         String text = m.get("text").get(0);
         Gson gson = new Gson();
         Database db = new Database();
         StringBuilder fromserver = new StringBuilder();
+        System.out.println("New Request --- " + " sender: " + senderAddress + "   text:" + text);
 
         String regex = null;
         boolean flag = true;
@@ -178,6 +191,7 @@ public class SendingOperations {
             request req = new request(text, senderAddress, Integer.parseInt(last), 1);
 
             //call a http request POST with ServiceURL, and send a Json with body, senderAddress, requestID and stateid
+            System.out.println("Message sent: " + gson.toJson(req) + "\n TO: " + serviceURL);
             URL url = new URL(serviceURL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoOutput(true);
@@ -207,15 +221,22 @@ public class SendingOperations {
         return "MessageDelivered";
     }
 
+    /**
+     * Service for Composer deliver response for a request from Client, parameter content is a Json composed by response(body field) and status of request, Sender receives notifications if they are enabled
+     * 
+     * @param requestid  requestid
+     * @param content  json composed by response(body field) and status of request
+     * @return 
+     */
     @Path("{requestid}/response")
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public String sendResponse(@PathParam("requestid") int requestid, String content) throws MalformedURLException {
+    public String sendResponse(@PathParam("requestid") int requestid, String content) {
         Gson gson = new Gson();
         Database db = new Database();
         response resp = gson.fromJson(content, response.class);
-
+        System.out.println("NewResonse:  req=" + requestid + "\n content:" + content);
         //check if requestID exist 
         String query = "SELECT * FROM request WHERE requestid='" + requestid + "';";
         ResultSet rs = db.executeQuery(query);
@@ -233,10 +254,14 @@ public class SendingOperations {
                     notifications = rsNotif.getBoolean("notifications");
                 }
                 int state = 4;
+                if (resp.getStatus() == 200) {
+                    state = 3;
+                }
+
                 //if notifications enable send sms For user with content Message Accepted or Not Accepted, with help of status code
                 if (notifications) {
                     if (resp.getStatus() == 200) {
-                        state = 3;
+
                         toSendSMS = "http://localhost:15013/cgi-bin/sendsms?username=kannel&password=kannel&to="
                                 + number.substring(4) + "&text=Message%20Accepted";
                     } else {
@@ -301,10 +326,17 @@ public class SendingOperations {
         throw new WebApplicationException(response);
     }
 
+    /**
+     * Service where client can check status of their last request
+     * 
+     * @param senderAddress message sent from
+     * @param requestId at this case requestId is a string called last when request comes from kannel, requestId can be a int too
+     * @return status of last request
+     */
     @Path("{senderAddress}/requests/{requestId}/status")
     @GET
-    public void getInfo(@PathParam("senderAddress") String senderAddress, @PathParam("requestId") String requestId) throws SQLException {
-
+    public String getInfo(@PathParam("senderAddress") String senderAddress, @PathParam("requestId") String requestId) {
+        String description = null;
         try {
             Database db = new Database();
             int intReqID;
@@ -337,7 +369,7 @@ public class SendingOperations {
             int state = rs.getInt("stateid");
             String getDescription = "SELECT * FROM state WHERE stateid = " + state + ";";
             ResultSet rs1 = db.executeQuery(getDescription);
-            String description = null;
+
             try {
                 if (rs1.next()) {
                     description = rs1.getString("description");
@@ -369,8 +401,9 @@ public class SendingOperations {
             conn.disconnect();
         } catch (MalformedURLException ex) {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (IOException | SQLException ex) {
             Logger.getLogger(SendingOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return description;
     }
 }
